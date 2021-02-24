@@ -56,7 +56,9 @@ public class Console
 
                 while (!srv.isStopped() && srv.isRunning()) {
                     try {
-                        String s = lr.readLine("/");
+                        String s = lr.readLine("/").trim();
+                        if (s.equals(""))
+                            continue;
                         srv.enqueueCommand(s, srv.getCommandSource());
                         if (s.equals("stop"))
                             break;
