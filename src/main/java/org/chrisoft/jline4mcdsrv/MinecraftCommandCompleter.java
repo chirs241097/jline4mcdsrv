@@ -34,7 +34,7 @@ public class MinecraftCommandCompleter implements Completer
             String applied = s.apply(line.line());
             ParsedLine apl = reader.getParser().parse(applied, line.cursor());
             String candStr = apl.word();
-            candidates.add(new Candidate(candStr));
+            candidates.add(new Candidate(candStr, candStr, null, null, null, null, false));
         }
     }
 }
