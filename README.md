@@ -4,7 +4,7 @@
 A server side mod to enable command history, auto completion and syntax
 highlighting on the server console. Should have zero impact on the gameplay.
 
-Fabric is the only supported mod loader, fabric api is not required by this mod.
+Fabric is the only supported mod loader, fabric api is required for the config.
 
 This mod is configurable using `jline4mcdsrv.toml`:
 * `logPattern` is the pattern used for Log4J (documentation [here](https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns))
