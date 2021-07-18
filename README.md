@@ -1,8 +1,6 @@
 # JLine for Minecraft Dedicated Server
 ![Icon](src/main/resources/assets/jline4mcdsrv/jline4mcdsrvicon.png)
 
-<a href="https://www.curseforge.com/minecraft/mc-mods/fabric-api"><img alt="Requires Fabric API" src="https://i.imgur.com/Ol1Tcf8.png" width="200"></a>
-
 A server side mod to enable command history, auto completion and syntax
 highlighting on the server console. Should have zero impact on the gameplay.
 
