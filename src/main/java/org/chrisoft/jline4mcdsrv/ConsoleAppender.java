@@ -4,6 +4,7 @@ import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.appender.rewrite.RewritePolicy;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.jline.reader.LineReader;
 
@@ -13,7 +14,7 @@ public class ConsoleAppender extends AbstractAppender {
     protected RewritePolicy policy;
 
     public ConsoleAppender(LineReader lr) {
-        super("Console", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.config.logPattern).build(), false);
+        super("Console", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.config.logPattern).build(), false, Property.EMPTY_ARRAY);
         this.lr = lr;
     }
 
