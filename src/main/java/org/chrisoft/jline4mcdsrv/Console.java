@@ -36,8 +36,8 @@ public class Console
                     .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
                     .build();
 
-                ConsoleAppender conAppender = new ConsoleAppender(lr);
-                conAppender.start();
+                JLineAppender jlineAppender = new JLineAppender(lr);
+                jlineAppender.start();
 
                 Logger logger = (Logger) LogManager.getLogger();
                 LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
@@ -46,13 +46,13 @@ public class Console
                 // compatibility hack for Not Enough Crashes
                 RewritePolicy policy = getNECRewritePolicy(conf);
                 if (policy != null) {
-                    conAppender.setRewritePolicy(policy);
+                    jlineAppender.setRewritePolicy(policy);
                     removeSysOutFromNECRewriteAppender(ctx, conf, policy);
                 }
 
                 // replace SysOut appender with Console appender
                 conf.removeAppender("SysOut");
-                conf.addAppender(conAppender, conf.getLevel(), null);
+                conf.addAppender(jlineAppender, conf.getLevel(), null);
                 ctx.updateLoggers();
 
                 while (!srv.isStopped() && srv.isRunning()) {

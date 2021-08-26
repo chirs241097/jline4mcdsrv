@@ -7,13 +7,13 @@ import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.jline.reader.LineReader;
 
-public class ConsoleAppender extends AbstractAppender {
+public class JLineAppender extends AbstractAppender {
 
     protected LineReader lr;
     protected RewritePolicy policy;
 
-    public ConsoleAppender(LineReader lr) {
-        super("Console", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.config.logPattern).build(), false, Property.EMPTY_ARRAY);
+    public JLineAppender(LineReader lr) {
+        super("JLine", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.config.logPattern).build(), false, Property.EMPTY_ARRAY);
         this.lr = lr;
     }
 
