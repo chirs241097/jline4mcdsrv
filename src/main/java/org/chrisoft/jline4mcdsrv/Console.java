@@ -39,9 +39,9 @@ public class Console
                 JLineAppender jlineAppender = new JLineAppender(lr);
                 jlineAppender.start();
 
-                Logger logger = (Logger) LogManager.getLogger();
                 LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-                LoggerConfig conf = ctx.getConfiguration().getLoggerConfig(logger.getName());
+                Logger rootLogger = ctx.getRootLogger();
+                LoggerConfig conf = rootLogger.get();
 
                 // compatibility hack for Not Enough Crashes
                 RewritePolicy policy = getNECRewritePolicy(conf);
@@ -52,7 +52,7 @@ public class Console
 
                 // replace SysOut appender with Console appender
                 conf.removeAppender("SysOut");
-                conf.addAppender(jlineAppender, conf.getLevel(), null);
+                conf.addAppender(jlineAppender, null, null);
                 ctx.updateLoggers();
 
                 while (!srv.isStopped() && srv.isRunning()) {
@@ -81,6 +81,8 @@ public class Console
         for (Appender appender : conf.getAppenders().values()) {
             if (appender.getName().equals("NotEnoughCrashesDeobfuscatingAppender")) {
                 try {
+                    // Could be replaced by a Mixin Accessor but this would add NEC as a compile dependency
+                    // This should be fine since speed isn't an issue and it hasn't failed yet
                     Field field = appender.getClass().getDeclaredField("rewritePolicy");
                     field.setAccessible(true);
                     return (RewritePolicy) field.get(appender);
@@ -100,8 +102,6 @@ public class Console
          * https://github.com/natanfudge/Not-Enough-Crashes/blob/147495dd4097017f4d243ead7f7e20d0ccfb7d40/notenoughcrashes/src/main/java/fudge/notenoughcrashes/DeobfuscatingRewritePolicy.java#L17-L41
          */
 
-        conf.removeAppender("NotEnoughCrashesDeobfuscatingAppender");
-
         // get all AppenderRefs except SysOut
         List<AppenderRef> appenderRefs = new ArrayList<>(conf.getAppenderRefs());
         appenderRefs.removeIf((ref) -> ref.getRef().equals("SysOut"));
@@ -117,6 +117,7 @@ public class Console
         );
         rewriteAppender.start();
 
+        conf.removeAppender("NotEnoughCrashesDeobfuscatingAppender");
         conf.addAppender(rewriteAppender, null, null);
     }
 }
