@@ -1,6 +1,5 @@
 package org.chrisoft.jline4mcdsrv;
 
-import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.appender.rewrite.RewritePolicy;
@@ -13,7 +12,7 @@ public class ConsoleAppender extends AbstractAppender {
     protected RewritePolicy policy;
 
     public ConsoleAppender(LineReader lr) {
-        super("Console", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.config.logPattern).build(), false);
+        super("Console", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.config.logPattern).build(), false, null);
         this.lr = lr;
     }
 
