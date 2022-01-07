@@ -10,9 +10,9 @@ import org.chrisoft.jline4mcdsrv.Console;
 @Mixin(MinecraftDedicatedServer.class)
 public abstract class DServerInject
 {
-    @Inject(at = @At("HEAD"), method = "setupServer()Z")
-    private void captureServer(CallbackInfoReturnable<Boolean> info)
-    {
-        Console.server = (MinecraftDedicatedServer) (Object) this;
-    }
+	@Inject(at = @At("HEAD"), method = "setupServer()Z")
+	private void captureServer(CallbackInfoReturnable<Boolean> info)
+	{
+		Console.server = (MinecraftDedicatedServer) (Object) this;
+	}
 }

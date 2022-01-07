@@ -8,14 +8,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 @Mixin(targets = {"net.minecraft.server.dedicated.MinecraftDedicatedServer$1"})
 public abstract class DServerConsoleThreadInject
 {
-    /**
-     * @author Fourmisain
-     * @reason Replaces the vanilla console handler logic
-     */
-    @Overwrite
-    public void run()
-    {
-        JLineForMcDSrvMain.LOGGER.info("Starting JLine4MCDSrv.");
-        Console.run();
-    }
+	/**
+	 * @author Fourmisain
+	 * @reason Replaces the vanilla console handler logic
+	 */
+	@Overwrite
+	public void run()
+	{
+		JLineForMcDSrvMain.LOGGER.info("Starting {}", JLineForMcDSrvMain.MOD_ID);
+		Console.run();
+	}
 }

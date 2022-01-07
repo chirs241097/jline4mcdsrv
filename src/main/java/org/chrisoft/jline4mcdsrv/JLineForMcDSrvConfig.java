@@ -14,7 +14,7 @@ import static org.chrisoft.jline4mcdsrv.JLineForMcDSrvMain.MOD_ID;
 
 public class JLineForMcDSrvConfig
 {
-	public transient static Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID + ".toml");
+	public transient static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID + ".toml");
 
 	// Represent AttributedStyle.BLACK = 0, AttributedStyle.RED = 1, ... AttributedStyle.WHITE = 7
 	public enum StyleColor {
@@ -22,9 +22,9 @@ public class JLineForMcDSrvConfig
 	}
 
 	public String logPattern = "%style{[%d{HH:mm:ss}]}{blue} "
-		+ "%highlight{[%t/%level]}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=green, TRACE=blue} "
-		+ "%style{(%logger{1})}{cyan} "
-		+ "%highlight{%msg%n}{FATAL=red, ERROR=red, WARN=normal, INFO=normal, DEBUG=normal, TRACE=normal}";
+			+ "%highlight{[%t/%level]}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=green, TRACE=blue} "
+			+ "%style{(%logger{1})}{cyan} "
+			+ "%highlight{%msg%n}{FATAL=red, ERROR=red, WARN=normal, INFO=normal, DEBUG=normal, TRACE=normal}";
 
 	public StyleColor[] highlightColors = {StyleColor.CYAN, StyleColor.YELLOW, StyleColor.GREEN, StyleColor.MAGENTA, StyleColor.WHITE};
 
@@ -40,13 +40,13 @@ public class JLineForMcDSrvConfig
 			if (toml.contains("highlightColors")) {
 				// convert list of strings to array of StyleColors
 				highlightColors = toml.getList("highlightColors").stream()
-					.map(obj -> StyleColor.valueOf((String) obj)).toArray(StyleColor[]::new);
+						.map(obj -> StyleColor.valueOf((String) obj)).toArray(StyleColor[]::new);
 			}
 		}
 	}
 
 	public void write() throws Exception {
-		try (BufferedWriter writer = Files.newBufferedWriter(CONFIG_PATH, WRITE, TRUNCATE_EXISTING, CREATE);) {
+		try (BufferedWriter writer = Files.newBufferedWriter(CONFIG_PATH, WRITE, TRUNCATE_EXISTING, CREATE)) {
 			new TomlWriter().write(this, writer);
 		}
 	}

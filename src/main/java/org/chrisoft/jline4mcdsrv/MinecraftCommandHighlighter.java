@@ -15,46 +15,46 @@ import java.util.regex.Pattern;
 
 public class MinecraftCommandHighlighter implements Highlighter
 {
-    private final CommandDispatcher<ServerCommandSource> cmdDispatcher;
-    private final ServerCommandSource cmdSrc;
+	private final CommandDispatcher<ServerCommandSource> cmdDispatcher;
+	private final ServerCommandSource cmdSrc;
 
-    public MinecraftCommandHighlighter(CommandDispatcher<ServerCommandSource> cmdDispatcher, ServerCommandSource cmdSrc)
-    {
-        this.cmdDispatcher = cmdDispatcher;
-        this.cmdSrc = cmdSrc;
-    }
+	public MinecraftCommandHighlighter(CommandDispatcher<ServerCommandSource> cmdDispatcher, ServerCommandSource cmdSrc)
+	{
+		this.cmdDispatcher = cmdDispatcher;
+		this.cmdSrc = cmdSrc;
+	}
 
-    @Override
-    public AttributedString highlight(LineReader reader, String buffer)
-    {
-        StyleColor[] colors = JLineForMcDSrvMain.config.highlightColors;
-        AttributedStringBuilder sb = new AttributedStringBuilder();
-        ParseResults<ServerCommandSource> parse = cmdDispatcher.parse(buffer, cmdSrc);
-        int pos = 0;
-        int component = -1;
-        for (ParsedCommandNode<ServerCommandSource> pcn : parse.getContext().getNodes()) {
-            if (++component >= colors.length)
-                component = 0;
-            if (pcn.getRange().getStart() >= buffer.length())
-                break;
-            int start = pcn.getRange().getStart();
-            int end = Math.min(pcn.getRange().getEnd(), buffer.length());
-            sb.append(buffer.substring(pos, start), AttributedStyle.DEFAULT);
-            sb.append(buffer.substring(start, end), AttributedStyle.DEFAULT.foreground(colors[component].ordinal()));
-            pos = end;
-        }
-        if (pos < buffer.length())
-            sb.append((buffer.substring(pos)), AttributedStyle.DEFAULT);
-        return sb.toAttributedString();
-    }
+	@Override
+	public AttributedString highlight(LineReader reader, String buffer)
+	{
+		StyleColor[] colors = JLineForMcDSrvMain.CONFIG.highlightColors;
+		AttributedStringBuilder sb = new AttributedStringBuilder();
+		ParseResults<ServerCommandSource> parse = cmdDispatcher.parse(buffer, cmdSrc);
+		int pos = 0;
+		int component = -1;
+		for (ParsedCommandNode<ServerCommandSource> pcn : parse.getContext().getNodes()) {
+			if (++component >= colors.length)
+				component = 0;
+			if (pcn.getRange().getStart() >= buffer.length())
+				break;
+			int start = pcn.getRange().getStart();
+			int end = Math.min(pcn.getRange().getEnd(), buffer.length());
+			sb.append(buffer.substring(pos, start), AttributedStyle.DEFAULT);
+			sb.append(buffer.substring(start, end), AttributedStyle.DEFAULT.foreground(colors[component].ordinal()));
+			pos = end;
+		}
+		if (pos < buffer.length())
+			sb.append((buffer.substring(pos)), AttributedStyle.DEFAULT);
+		return sb.toAttributedString();
+	}
 
-    @Override
-    public void setErrorPattern(Pattern errorPattern)
-    {
-    }
+	@Override
+	public void setErrorPattern(Pattern errorPattern)
+	{
+	}
 
-    @Override
-    public void setErrorIndex(int errorIndex)
-    {
-    }
+	@Override
+	public void setErrorIndex(int errorIndex)
+	{
+	}
 }

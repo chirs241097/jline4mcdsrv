@@ -6,21 +6,21 @@ import org.apache.logging.log4j.Logger;
 
 public class JLineForMcDSrvMain implements ModInitializer
 {
-	public static String MOD_ID = "jline4mcdsrv";
-	public static JLineForMcDSrvConfig config;
+	public static final String MOD_ID = "jline4mcdsrv";
+	public static final JLineForMcDSrvConfig CONFIG;
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
 	static {
-		config = new JLineForMcDSrvConfig();
+		CONFIG = new JLineForMcDSrvConfig();
 
 		try {
-			config.read();
+			CONFIG.read();
 		} catch (Exception e) {
 			LOGGER.error("couldn't fully read config file! {}", e.getMessage());
 		}
 
 		try {
-			config.write();
+			CONFIG.write();
 		} catch (Exception e) {
 			LOGGER.error("couldn't write config file! {}", e.getMessage());
 		}
