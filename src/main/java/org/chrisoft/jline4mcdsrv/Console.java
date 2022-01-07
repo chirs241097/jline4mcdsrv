@@ -1,7 +1,6 @@
 package org.chrisoft.jline4mcdsrv;
 
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
-import net.minecraft.util.logging.UncaughtExceptionLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Logger;
@@ -19,60 +18,56 @@ import org.jline.reader.UserInterruptException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.chrisoft.jline4mcdsrv.JLineForMcDSrvMain.LOGGER;
 
 public class Console
 {
-    public static void setup(MinecraftDedicatedServer srv)
+    public static MinecraftDedicatedServer server;
+
+    public static void run()
     {
-        Thread conThrd = new Thread("jline4mcdsrv Console Thread")
-        {
-            public void run()
-            {
-                LineReader lr = LineReaderBuilder.builder()
-                    .completer(new MinecraftCommandCompleter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
-                    .highlighter(new MinecraftCommandHighlighter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
-                    .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
-                    .build();
+        MinecraftDedicatedServer srv = Objects.requireNonNull(server); // captureServer() happens-before
 
-                JLineAppender jlineAppender = new JLineAppender(lr);
-                jlineAppender.start();
+        LineReader lr = LineReaderBuilder.builder()
+            .completer(new MinecraftCommandCompleter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
+            .highlighter(new MinecraftCommandHighlighter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
+            .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
+            .build();
 
-                LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-                Logger rootLogger = ctx.getRootLogger();
-                LoggerConfig conf = rootLogger.get();
+        JLineAppender jlineAppender = new JLineAppender(lr);
+        jlineAppender.start();
 
-                // compatibility hack for Not Enough Crashes
-                RewritePolicy policy = getNECRewritePolicy(conf);
-                if (policy != null) {
-                    jlineAppender.setRewritePolicy(policy);
-                    removeSysOutFromNECRewriteAppender(ctx, conf, policy);
-                }
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Logger rootLogger = ctx.getRootLogger();
+        LoggerConfig conf = rootLogger.get();
 
-                // replace SysOut appender with Console appender
-                conf.removeAppender("SysOut");
-                conf.addAppender(jlineAppender, null, null);
-                ctx.updateLoggers();
+        // compatibility hack for Not Enough Crashes
+        RewritePolicy policy = getNECRewritePolicy(conf);
+        if (policy != null) {
+            jlineAppender.setRewritePolicy(policy);
+            removeSysOutFromNECRewriteAppender(ctx, conf, policy);
+        }
 
-                while (!srv.isStopped() && srv.isRunning()) {
-                    try {
-                        String s = lr.readLine("/").trim();
-                        if (s.equals(""))
-                            continue;
-                        srv.enqueueCommand(s, srv.getCommandSource());
-                        if (s.equals("stop"))
-                            break;
-                    } catch (EndOfFileException|UserInterruptException e) {
-                        srv.enqueueCommand("stop", srv.getCommandSource());
-                        break;
-                    }
-                }
+        // replace SysOut appender with Console appender
+        conf.removeAppender("SysOut");
+        conf.addAppender(jlineAppender, null, null);
+        ctx.updateLoggers();
+
+        while (!srv.isStopped() && srv.isRunning()) {
+            try {
+                String s = lr.readLine("/").trim();
+                if (s.equals(""))
+                    continue;
+                srv.enqueueCommand(s, srv.getCommandSource());
+                if (s.equals("stop"))
+                    break;
+            } catch (EndOfFileException|UserInterruptException e) {
+                srv.enqueueCommand("stop", srv.getCommandSource());
+                break;
             }
-        };
-        conThrd.setDaemon(true);
-        conThrd.setUncaughtExceptionHandler(new UncaughtExceptionLogger(LOGGER));
-        conThrd.start();
+        }
     }
 
     /** Read the RewritePolicy Not Enough Crashes uses to deobfuscate stack traces */
