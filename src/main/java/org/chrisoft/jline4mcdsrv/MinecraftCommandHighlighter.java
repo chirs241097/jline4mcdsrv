@@ -16,18 +16,17 @@ public class MinecraftCommandHighlighter implements Highlighter
 {
     private final CommandDispatcher<ServerCommandSource> cmdDispatcher;
     private final ServerCommandSource cmdSrc;
-    private final int[] colors;
 
     public MinecraftCommandHighlighter(CommandDispatcher<ServerCommandSource> cmdDispatcher, ServerCommandSource cmdSrc)
     {
         this.cmdDispatcher = cmdDispatcher;
         this.cmdSrc = cmdSrc;
-        colors = JLineForMcDSrvMain.config.highlightColorIndices;
     }
 
     @Override
     public AttributedString highlight(LineReader reader, String buffer)
     {
+        int[] colors = JLineForMcDSrvMain.config.highlightColorIndices;
         AttributedStringBuilder sb = new AttributedStringBuilder();
         ParseResults<ServerCommandSource> parse = cmdDispatcher.parse(buffer, cmdSrc);
         int pos = 0;

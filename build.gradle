@@ -10,10 +10,6 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-repositories {
-	maven { url "https://maven.shedaniel.me/" }
-}
-
 dependencies {
 	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -24,8 +20,8 @@ dependencies {
 	modImplementation include("org.jline:jline-terminal-jansi:${project.jline_version}")
 	modImplementation include("org.fusesource.jansi:jansi:${project.jansi_version}")
 
-	include modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
-		exclude(group: "net.fabricmc.fabric-api")
+	include modApi("com.moandjiezana.toml:toml4j:${project.toml4j_version}") {
+		exclude(module: "gson")
 	}
 }
 
@@ -37,9 +33,6 @@ processResources {
 	}
 }
 
-// ensure that the encoding is set to UTF-8, no matter what the system default is
-// this fixes some edge cases with special characters not displaying correctly
-// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
 tasks.withType(JavaCompile).configureEach {
 	it.options.compilerArgs.add('-Xlint:deprecation')
 	it.options.release = 16
