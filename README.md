@@ -1,5 +1,5 @@
 # JLine for Minecraft Dedicated Server
-![Icon](src/main/resources/assets/jline4mcdsrv/jline4mcdsrvicon.png)
+![Icon](jline4mcdsrvicon.png)
 
 A server side fabric mod to enable command history, auto completion and syntax
 highlighting on the server console. Should have zero impact on the gameplay.
