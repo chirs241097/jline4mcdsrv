@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import net.minecraft.server.command.ServerCommandSource;
+import org.chrisoft.jline4mcdsrv.JLineForMcDSrvConfig.StyleColor;
 import org.jline.reader.Highlighter;
 import org.jline.reader.LineReader;
 import org.jline.utils.AttributedString;
@@ -26,7 +27,7 @@ public class MinecraftCommandHighlighter implements Highlighter
     @Override
     public AttributedString highlight(LineReader reader, String buffer)
     {
-        int[] colors = JLineForMcDSrvMain.config.highlightColorIndices;
+        StyleColor[] colors = JLineForMcDSrvMain.config.highlightColors;
         AttributedStringBuilder sb = new AttributedStringBuilder();
         ParseResults<ServerCommandSource> parse = cmdDispatcher.parse(buffer, cmdSrc);
         int pos = 0;
@@ -39,7 +40,7 @@ public class MinecraftCommandHighlighter implements Highlighter
             int start = pcn.getRange().getStart();
             int end = Math.min(pcn.getRange().getEnd(), buffer.length());
             sb.append(buffer.substring(pos, start), AttributedStyle.DEFAULT);
-            sb.append(buffer.substring(start, end), AttributedStyle.DEFAULT.foreground(colors[component]));
+            sb.append(buffer.substring(start, end), AttributedStyle.DEFAULT.foreground(colors[component].ordinal()));
             pos = end;
         }
         if (pos < buffer.length())

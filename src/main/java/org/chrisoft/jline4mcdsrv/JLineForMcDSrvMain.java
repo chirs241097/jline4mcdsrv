@@ -16,7 +16,7 @@ public class JLineForMcDSrvMain implements ModInitializer
 		try {
 			config.read();
 		} catch (Exception e) {
-			LOGGER.error("couldn't read config file! {}", e.getMessage());
+			LOGGER.error("couldn't fully read config file! {}", e.getMessage());
 		}
 
 		try {
