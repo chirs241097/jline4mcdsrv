@@ -28,23 +28,37 @@ public class MinecraftCommandHighlighter implements Highlighter
 	public AttributedString highlight(LineReader reader, String buffer)
 	{
 		StyleColor[] colors = JLineForMcDSrvMain.CONFIG.highlightColors;
+		String[] lines = buffer.split("\\n");
 		AttributedStringBuilder sb = new AttributedStringBuilder();
-		ParseResults<ServerCommandSource> parse = cmdDispatcher.parse(buffer, cmdSrc);
-		int pos = 0;
-		int component = -1;
-		for (ParsedCommandNode<ServerCommandSource> pcn : parse.getContext().getNodes()) {
-			if (++component >= colors.length)
-				component = 0;
-			if (pcn.getRange().getStart() >= buffer.length())
-				break;
-			int start = pcn.getRange().getStart();
-			int end = Math.min(pcn.getRange().getEnd(), buffer.length());
-			sb.append(buffer.substring(pos, start), AttributedStyle.DEFAULT);
-			sb.append(buffer.substring(start, end), AttributedStyle.DEFAULT.foreground(colors[component].ordinal()));
-			pos = end;
+
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			ParseResults<ServerCommandSource> parsed = cmdDispatcher.parse(line, cmdSrc);
+
+			int pos = 0;
+			int component = -1;
+			for (ParsedCommandNode<ServerCommandSource> pcn : parsed.getContext().getNodes()) {
+				if (++component >= colors.length)
+					component = 0;
+
+				int start = pcn.getRange().getStart();
+				int end = Math.min(pcn.getRange().getEnd(), line.length());
+
+				if (start >= line.length())
+					break;
+
+				sb.append(line.substring(pos, start), AttributedStyle.DEFAULT);
+				sb.append(line.substring(start, end), AttributedStyle.DEFAULT.foreground(colors[component].ordinal()));
+				pos = end;
+			}
+			if (pos < line.length())
+				sb.append(line.substring(pos), AttributedStyle.DEFAULT);
+
+			// account for line breaks; last line might or might not have one
+			if (!(i == lines.length - 1 && !buffer.endsWith("\n")))
+				sb.append("\n", AttributedStyle.DEFAULT);
 		}
-		if (pos < buffer.length())
-			sb.append((buffer.substring(pos)), AttributedStyle.DEFAULT);
+
 		return sb.toAttributedString();
 	}
 
