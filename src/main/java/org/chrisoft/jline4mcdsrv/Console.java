@@ -33,6 +33,7 @@ public class Console
 		LineReader lr = LineReaderBuilder.builder()
 				.completer(new MinecraftCommandCompleter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
 				.highlighter(new MinecraftCommandHighlighter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
+				.variable(LineReader.SECONDARY_PROMPT_PATTERN, "/")
 				.option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
 				.build();
 
@@ -57,15 +58,23 @@ public class Console
 
 		while (!srv.isStopped() && srv.isRunning()) {
 			try {
-				String s = lr.readLine("/").trim();
-				if (s.equals(""))
-					continue;
-				srv.enqueueCommand(s, srv.getCommandSource());
-				if (s.equals("stop"))
-					break;
+				// readLine can read multi-line inputs which we manually split up
+				String[] lines = lr.readLine("/").split("\\n");
+
+				for (String cmd : lines) {
+					cmd = cmd.trim();
+
+					if (cmd.isEmpty())
+						continue;
+
+					srv.enqueueCommand(cmd, srv.getCommandSource());
+
+					if (cmd.equals("stop"))
+						return;
+				}
 			} catch (EndOfFileException|UserInterruptException e) {
 				srv.enqueueCommand("stop", srv.getCommandSource());
-				break;
+				return;
 			}
 		}
 	}
