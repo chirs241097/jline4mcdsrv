@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import net.minecraft.server.command.ServerCommandSource;
-import org.apache.commons.lang3.ArrayUtils;
 import org.chrisoft.jline4mcdsrv.JLineForMcDSrvConfig.StyleColor;
 import org.jline.reader.Highlighter;
 import org.jline.reader.LineReader;
@@ -29,8 +28,7 @@ public class MinecraftCommandHighlighter implements Highlighter
 	public AttributedString highlight(LineReader reader, String buffer)
 	{
 		StyleColor[] colors = JLineForMcDSrvMain.CONFIG.highlightColors;
-		String[] lines = buffer.split("\\n", -1); // "split(delimiter) by default removes trailing empty strings from result array. To turn this mechanism off we need to use overloaded version of split(delimiter, limit) with limit set to negative value like"
-		if (lines[lines.length-1].isEmpty()) lines = ArrayUtils.subarray(lines, 0, lines.length-1); // remove last empty line as there is detection of that already
+		String[] lines = buffer.split("\\n", -1);
 		AttributedStringBuilder sb = new AttributedStringBuilder();
 
 		for (int i = 0; i < lines.length; i++) {
@@ -56,8 +54,7 @@ public class MinecraftCommandHighlighter implements Highlighter
 			if (pos < line.length())
 				sb.append(line.substring(pos), AttributedStyle.DEFAULT);
 
-			// account for line breaks; last line might or might not have one
-			if (!(i == lines.length - 1 && !buffer.endsWith("\n")))
+			if (i != lines.length - 1)
 				sb.append("\n", AttributedStyle.DEFAULT);
 		}
 
