@@ -30,6 +30,8 @@ public class JLineForMcDSrvConfig
 
 	public boolean applyMinecraftStyle = true;
 
+	public String prompt = "/";
+
 	public void read() throws Exception {
 		if (!Files.exists(JLineForMcDSrvConfig.CONFIG_PATH))
 			return;

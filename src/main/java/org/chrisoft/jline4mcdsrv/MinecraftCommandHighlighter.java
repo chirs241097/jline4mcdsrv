@@ -55,6 +55,12 @@ public class MinecraftCommandHighlighter implements Highlighter
 
 		for (int i = 0; i < lines.length; i++) {
 			String line = lines[i];
+
+			if (line.startsWith("/")) {
+				sb.append("/", AttributedStyle.DEFAULT);
+				line = line.substring(1);
+			}
+
 			ParseResults<ServerCommandSource> parsed = cmdDispatcher.parse(line, cmdSrc);
 
 			int pos = 0;

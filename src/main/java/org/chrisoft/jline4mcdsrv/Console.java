@@ -19,6 +19,7 @@ import org.jline.utils.AttributedStyle;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import static org.chrisoft.jline4mcdsrv.JLineForMcDSrvMain.CONFIG;
 import static org.chrisoft.jline4mcdsrv.JLineForMcDSrvMain.LOGGER;
 import static org.jline.utils.AttributedStyle.*;
 
@@ -59,7 +60,7 @@ public class Console
 		while (!srv.isStopped() && srv.isRunning()) {
 			try {
 				// readLine can read multi-line inputs which we manually split up
-				String[] lines = lr.readLine("/").split("\\n");
+				String[] lines = lr.readLine(CONFIG.prompt).split("\\n");
 
 				for (String cmd : lines) {
 					cmd = cmd.trim();
