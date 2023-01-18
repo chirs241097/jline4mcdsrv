@@ -46,6 +46,10 @@ public class JLineForMcDSrvConfig
 				highlightColors = toml.getList("highlightColors").stream()
 						.map(obj -> StyleColor.valueOf((String) obj)).toArray(StyleColor[]::new);
 			}
+
+			applyMinecraftStyle = toml.getBoolean("applyMinecraftStyle", applyMinecraftStyle);
+
+			prompt = toml.getString("prompt", prompt);
 		}
 	}
 
