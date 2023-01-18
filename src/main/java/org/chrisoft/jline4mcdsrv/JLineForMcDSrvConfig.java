@@ -28,6 +28,8 @@ public class JLineForMcDSrvConfig
 
 	public StyleColor[] highlightColors = {StyleColor.CYAN, StyleColor.YELLOW, StyleColor.GREEN, StyleColor.MAGENTA, StyleColor.WHITE};
 
+	public boolean applyMinecraftStyle = true;
+
 	public void read() throws Exception {
 		if (!Files.exists(JLineForMcDSrvConfig.CONFIG_PATH))
 			return;

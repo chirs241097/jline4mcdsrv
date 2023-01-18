@@ -14,13 +14,13 @@ import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
+import org.jline.utils.AttributedStyle;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.chrisoft.jline4mcdsrv.JLineForMcDSrvMain.LOGGER;
+import static org.jline.utils.AttributedStyle.*;
 
 public class Console
 {
@@ -123,5 +123,64 @@ public class Console
 
 		conf.removeAppender("NotEnoughCrashesDeobfuscatingAppender");
 		conf.addAppender(rewriteAppender, null, null);
+	}
+
+	public static AttributedStyle applyMinecraftStyle(char c, AttributedStyle style, AttributedStyle defaultStyle) {
+		// reset
+		if (('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || c == 'r')
+			style = defaultStyle;
+
+		switch (c) {
+			case 'l' -> style = style.bold();
+			case 'o' -> style = style.italic();
+			case 'n' -> style = style.underline();
+			case 'k' -> style = style.conceal();
+			case 'm' -> style = style.crossedOut();
+			case '0' -> style = style.foreground(BLACK).background(WHITE); // workaround for invisible text
+			case '1' -> style = style.foreground(BLUE);
+			case '2' -> style = style.foreground(GREEN);
+			case '3' -> style = style.foreground(CYAN);
+			case '4' -> style = style.foreground(RED);
+			case '5' -> style = style.foreground(MAGENTA);
+			case '6' -> style = style.foreground(YELLOW);
+			case '7' -> style = style.foreground(WHITE); // gray
+			case '8' -> style = style.foreground(BRIGHT | BLACK); // dark grey
+			case '9' -> style = style.foreground(BRIGHT | BLUE);
+			case 'a' -> style = style.foreground(BRIGHT | GREEN);
+			case 'b' -> style = style.foreground(BRIGHT | CYAN);
+			case 'c' -> style = style.foreground(BRIGHT | RED);
+			case 'd' -> style = style.foreground(BRIGHT | MAGENTA);
+			case 'e' -> style = style.foreground(BRIGHT | YELLOW);
+			case 'f' -> style = style.foreground(BRIGHT | WHITE); // white
+		}
+
+		return style;
+	}
+
+	// by vlad2305m, https://github.com/chirs241097/jline4mcdsrv/issues/18#issue-1533489282
+	public static String applyMinecraftStyle(String in) {
+		return in
+			.replace("§r", "\033[0m")     // reset
+			.replace("§l", "\033[1m")     // bold
+			.replace("§o", "\033[3m")     // italic
+			.replace("§n", "\033[4m")     // underline
+			.replace("§k", "\033[8m")     // obfuscated
+			.replace("§m", "\033[9m")     // strikethrough
+			.replace("§0", "\033[0;30m")  // black
+			.replace("§1", "\033[0;34m")  // blue
+			.replace("§2", "\033[0;32m")  // green
+			.replace("§3", "\033[0;36m")  // cyan
+			.replace("§4", "\033[0;31m")  // red
+			.replace("§5", "\033[0;35m")  // purple
+			.replace("§6", "\033[0;33m")  // gold
+			.replace("§7", "\033[0;37m")  // gray
+			.replace("§8", "\033[0;90m")  // D grey
+			.replace("§9", "\033[0;94m")  // B blue
+			.replace("§a", "\033[0;92m")  // B green
+			.replace("§b", "\033[0;96m")  // B cyan
+			.replace("§c", "\033[0;91m")  // B red
+			.replace("§d", "\033[0;95m")  // B purple
+			.replace("§e", "\033[0;93m")  // B yellow
+			.replace("§f", "\033[0;97m"); // white
 	}
 }

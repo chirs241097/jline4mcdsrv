@@ -7,6 +7,8 @@ import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.jline.reader.LineReader;
 
+import static org.chrisoft.jline4mcdsrv.Console.applyMinecraftStyle;
+
 public class JLineAppender extends AbstractAppender {
 
 	protected final LineReader lr;
@@ -29,7 +31,10 @@ public class JLineAppender extends AbstractAppender {
 		if (lr.isReading())
 			lr.callWidget(lr.CLEAR);
 
-		lr.getTerminal().writer().print(getLayout().toSerializable(event).toString());
+		String s = getLayout().toSerializable(event).toString();
+		if (JLineForMcDSrvMain.CONFIG.applyMinecraftStyle)
+			s = applyMinecraftStyle(s);
+		lr.getTerminal().writer().print(s);
 
 		if (lr.isReading()) {
 			lr.callWidget(lr.REDRAW_LINE);
