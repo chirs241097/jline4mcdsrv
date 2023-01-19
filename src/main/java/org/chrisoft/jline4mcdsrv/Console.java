@@ -185,8 +185,8 @@ public class Console
 			.replace("§f", "\033[0;97m"); // white
 		if (CONFIG.styleContrastBackground) s = s
 				.replace("\033[0;30m", "\033[0;30m\033[0;107m") // black on white (cmd)
-				.replace("\033[0;30m", "\033[0;34m\033[0;107m") // blue on white (powershell)
-				.replace("\033[0;30m", "\033[0;97m\033[0;40m"); // white on black (light theme)
+				.replace("\033[0;34m", "\033[0;34m\033[0;107m") // blue on white (powershell)
+				.replace("\033[0;97m", "\033[0;97m\033[0;40m"); // white on black (light theme)
 		return s;
 	}
 }
