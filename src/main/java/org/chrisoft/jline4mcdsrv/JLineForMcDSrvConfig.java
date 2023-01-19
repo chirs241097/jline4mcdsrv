@@ -30,6 +30,8 @@ public class JLineForMcDSrvConfig
 
 	public boolean applyMinecraftStyle = true;
 
+	public boolean styleContrastBackground = false;
+
 	public String prompt = "/";
 
 	public void read() throws Exception {
@@ -48,6 +50,8 @@ public class JLineForMcDSrvConfig
 			}
 
 			applyMinecraftStyle = toml.getBoolean("applyMinecraftStyle", applyMinecraftStyle);
+
+			styleContrastBackground = toml.getBoolean("styleContrastBackground", styleContrastBackground);
 
 			prompt = toml.getString("prompt", prompt);
 		}

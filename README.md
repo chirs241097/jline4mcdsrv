@@ -17,3 +17,31 @@ code.
 
 ## Downloads
 The mod can be downloaded for Minecraft 1.16 onwards on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/jline-for-minecraft-dedicated-server/files)
+
+<details>
+  <summary>Debugging/running with IntelliJ</summary>
+
+### Setup
+1. Fork and setup like any other Minecraft mod
+2. Run Server configuration, accept EULA, ensure it runs successfully
+3. Create debug.bat (or .sh)
+4. paste the first line from the Server run log (the one that expands to oblivion when clicked ("C:...")) into there, append _new line_ `pause` if you want to see crashes
+
+If the line is less than a thousand characters, something is wrong => `Edit Configurations...` -> `Shorten command line:` `none` and rerun
+#### For debug
+5. `Edit Configurations...` / `Add New Configuration` / `Remote JVM Debug` -> `Transport=Shared Memory`, `Address=localhost:25555` (not tested other values, but address should be filled), Use module classpath=main.
+6. Copy Command line arguments for remote JVM and paste into the beginning of debug.bat replacing existing agentlib config
+
+- Don't forget to add `-Dlog4j.skipJansi=false` to script and save it
+
+### Debug loop
+1. Build
+2. Run debug.bat
+3. Start debugger
+4. Debug
+5. Close (cmd) manually
+
+### Note
+Each time launching `Minecraft Server` configuration changes the first line a bit, so you might need to update stuff after agentlib config in the script.
+- Definetely update after adding new files
+</details>

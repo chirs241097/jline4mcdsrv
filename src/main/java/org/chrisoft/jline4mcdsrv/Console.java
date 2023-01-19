@@ -135,10 +135,10 @@ public class Console
 			case 'l' -> style = style.bold();
 			case 'o' -> style = style.italic();
 			case 'n' -> style = style.underline();
-			case 'k' -> style = style.conceal();
+			case 'k' -> style = style.blink(); // obfuscated
 			case 'm' -> style = style.crossedOut();
-			case '0' -> style = style.foreground(BLACK).background(WHITE); // workaround for invisible text
-			case '1' -> style = style.foreground(BLUE);
+			case '0' -> {style = style.foreground(BLACK); if (CONFIG.styleContrastBackground) style = style.background(BRIGHT | WHITE);} // workaround for invisible text
+			case '1' -> {style = style.foreground(BLUE); if (CONFIG.styleContrastBackground) style = style.background(BRIGHT | WHITE);}
 			case '2' -> style = style.foreground(GREEN);
 			case '3' -> style = style.foreground(CYAN);
 			case '4' -> style = style.foreground(RED);
@@ -152,20 +152,20 @@ public class Console
 			case 'c' -> style = style.foreground(BRIGHT | RED);
 			case 'd' -> style = style.foreground(BRIGHT | MAGENTA);
 			case 'e' -> style = style.foreground(BRIGHT | YELLOW);
-			case 'f' -> style = style.foreground(BRIGHT | WHITE); // white
+			case 'f' -> {style = style.foreground(BRIGHT | WHITE); if (CONFIG.styleContrastBackground) style = style.background(BLACK);} // white
 		}
 
 		return style;
 	}
 
 	// by vlad2305m, https://github.com/chirs241097/jline4mcdsrv/issues/18#issue-1533489282
-	public static String applyMinecraftStyle(String in) {
-		return in
+	public static String applyMinecraftStyle(String s) {
+		s = s
 			.replace("§r", "\033[0m")     // reset
 			.replace("§l", "\033[1m")     // bold
 			.replace("§o", "\033[3m")     // italic
 			.replace("§n", "\033[4m")     // underline
-			.replace("§k", "\033[8m")     // obfuscated
+			.replace("§k", "\033[5m")     // obfuscated (blink)
 			.replace("§m", "\033[9m")     // strikethrough
 			.replace("§0", "\033[0;30m")  // black
 			.replace("§1", "\033[0;34m")  // blue
@@ -183,5 +183,10 @@ public class Console
 			.replace("§d", "\033[0;95m")  // B purple
 			.replace("§e", "\033[0;93m")  // B yellow
 			.replace("§f", "\033[0;97m"); // white
+		if (CONFIG.styleContrastBackground) s = s
+				.replace("\033[0;30m", "\033[0;30m\033[0;107m") // black on white (cmd)
+				.replace("\033[0;34m", "\033[0;34m\033[0;107m") // blue on white (powershell)
+				.replace("\033[0;97m", "\033[0;97m\033[0;40m"); // white on black (light theme)
+		return s;
 	}
 }
