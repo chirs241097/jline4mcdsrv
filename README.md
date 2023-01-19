@@ -26,9 +26,10 @@ The mod can be downloaded for Minecraft 1.16 onwards on [CurseForge](https://www
 2. Run Server configuration, accept EULA, ensure it runs successfully
 3. Create debug.bat (or .sh)
 4. paste the first line from the Server run log (the one that expands to oblivion when clicked ("C:...")) into there, append _new line_ `pause` if you want to see crashes
-If the line is less than a thousand characters, something is wrong => Edit run configuration -> Shorten command line: `none`; and rerun
+
+If the line is less than a thousand characters, something is wrong => `Edit Configurations...` -> `Shorten command line:` `none` and rerun
 #### For debug
-5. Edit Configurations... / Add New Configuration / Remote JVM Debug -> Transport=Shared Memory, Address=localhost:25555 (not tested other values, but address should be filled), Use module classpath=main.
+5. `Edit Configurations...` / `Add New Configuration` / `Remote JVM Debug` -> `Transport=Shared Memory`, `Address=localhost:25555` (not tested other values, but address should be filled), Use module classpath=main.
 6. Copy Command line arguments for remote JVM and paste into the beginning of debug.bat replacing existing agentlib config
 
 - Don't forget to add `-Dlog4j.skipJansi=false` to script and save it
