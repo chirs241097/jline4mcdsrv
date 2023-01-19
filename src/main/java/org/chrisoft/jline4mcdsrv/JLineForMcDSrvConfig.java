@@ -32,6 +32,8 @@ public class JLineForMcDSrvConfig
 
 	public boolean styleContrastBackground = false;
 
+	public boolean concealObfuscatedText = false;
+
 	public String prompt = "/";
 
 	public void read() throws Exception {
@@ -52,6 +54,8 @@ public class JLineForMcDSrvConfig
 			applyMinecraftStyle = toml.getBoolean("applyMinecraftStyle", applyMinecraftStyle);
 
 			styleContrastBackground = toml.getBoolean("styleContrastBackground", styleContrastBackground);
+
+			concealObfuscatedText = toml.getBoolean("concealObfuscatedText", concealObfuscatedText);
 
 			prompt = toml.getString("prompt", prompt);
 		}

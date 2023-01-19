@@ -135,7 +135,7 @@ public class Console
 			case 'l' -> style = style.bold();
 			case 'o' -> style = style.italic();
 			case 'n' -> style = style.underline();
-			case 'k' -> style = style.blink(); // obfuscated
+			case 'k' -> { style = CONFIG.concealObfuscatedText ? style.conceal() : style.blink(); }
 			case 'm' -> style = style.crossedOut();
 			case '0' -> {style = style.foreground(BLACK); if (CONFIG.styleContrastBackground) style = style.background(BRIGHT | WHITE);} // workaround for invisible text
 			case '1' -> {style = style.foreground(BLUE); if (CONFIG.styleContrastBackground) style = style.background(BRIGHT | WHITE);}
@@ -165,7 +165,7 @@ public class Console
 			.replace("§l", "\033[1m")     // bold
 			.replace("§o", "\033[3m")     // italic
 			.replace("§n", "\033[4m")     // underline
-			.replace("§k", "\033[5m")     // obfuscated (blink)
+			.replace("§k", CONFIG.concealObfuscatedText ? "\033[8m" : "\033[5m")     // obfuscated (conceal or blink)
 			.replace("§m", "\033[9m")     // strikethrough
 			.replace("§0", "\033[0;30m")  // black
 			.replace("§1", "\033[0;34m")  // blue
@@ -183,10 +183,12 @@ public class Console
 			.replace("§d", "\033[0;95m")  // B purple
 			.replace("§e", "\033[0;93m")  // B yellow
 			.replace("§f", "\033[0;97m"); // white
+
 		if (CONFIG.styleContrastBackground) s = s
 				.replace("\033[0;30m", "\033[0;30m\033[0;107m") // black on white (cmd)
 				.replace("\033[0;34m", "\033[0;34m\033[0;107m") // blue on white (powershell)
 				.replace("\033[0;97m", "\033[0;97m\033[0;40m"); // white on black (light theme)
+
 		return s;
 	}
 }
