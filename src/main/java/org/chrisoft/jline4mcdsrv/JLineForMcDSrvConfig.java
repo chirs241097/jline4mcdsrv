@@ -30,7 +30,7 @@ public class JLineForMcDSrvConfig
 
 	public boolean applyMinecraftStyle = true;
 
-	public boolean styleContrastBackground = true;
+	public boolean styleContrastBackground = false;
 
 	public String prompt = "/";
 
@@ -51,7 +51,7 @@ public class JLineForMcDSrvConfig
 
 			applyMinecraftStyle = toml.getBoolean("applyMinecraftStyle", applyMinecraftStyle);
 
-			styleContrastBackground = toml.getBoolean("applyMinecraftStyle", styleContrastBackground);
+			styleContrastBackground = toml.getBoolean("styleContrastBackground", styleContrastBackground);
 
 			prompt = toml.getString("prompt", prompt);
 		}
