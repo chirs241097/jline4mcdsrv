@@ -15,7 +15,7 @@ public class JLineAppender extends AbstractAppender {
 	protected RewritePolicy policy;
 
 	public JLineAppender(LineReader lr) {
-		super("JLine", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.CONFIG.logPattern).build(), false, Property.EMPTY_ARRAY);
+		super("JLine", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.CONFIG.logPattern).build(), false);
 		this.lr = lr;
 	}
 

@@ -132,27 +132,27 @@ public class Console
 			style = defaultStyle;
 
 		switch (c) {
-			case 'l' -> style = style.bold();
-			case 'o' -> style = style.italic();
-			case 'n' -> style = style.underline();
-			case 'k' -> { style = CONFIG.concealObfuscatedText ? style.conceal() : style.blink(); }
-			case 'm' -> style = style.crossedOut();
-			case '0' -> {style = style.foreground(BLACK); if (CONFIG.styleContrastBackground) style = style.background(BRIGHT | WHITE);} // workaround for invisible text
-			case '1' -> {style = style.foreground(BLUE); if (CONFIG.styleContrastBackground) style = style.background(BRIGHT | WHITE);}
-			case '2' -> style = style.foreground(GREEN);
-			case '3' -> style = style.foreground(CYAN);
-			case '4' -> style = style.foreground(RED);
-			case '5' -> style = style.foreground(MAGENTA);
-			case '6' -> style = style.foreground(YELLOW);
-			case '7' -> style = style.foreground(WHITE); // gray
-			case '8' -> style = style.foreground(BRIGHT | BLACK); // dark grey
-			case '9' -> style = style.foreground(BRIGHT | BLUE);
-			case 'a' -> style = style.foreground(BRIGHT | GREEN);
-			case 'b' -> style = style.foreground(BRIGHT | CYAN);
-			case 'c' -> style = style.foreground(BRIGHT | RED);
-			case 'd' -> style = style.foreground(BRIGHT | MAGENTA);
-			case 'e' -> style = style.foreground(BRIGHT | YELLOW);
-			case 'f' -> {style = style.foreground(BRIGHT | WHITE); if (CONFIG.styleContrastBackground) style = style.background(BLACK);} // white
+			case 'l': { style = style.bold(); break; }
+			case 'o': { style = style.italic(); break; }
+			case 'n': { style = style.underline(); break; }
+			case 'k': { style = CONFIG.concealObfuscatedText ? style.conceal() : style.blink(); break; }
+			case 'm': { style = style.crossedOut(); break; }
+			case '0': { style = style.foreground(BLACK); if (CONFIG.styleContrastBackground) style = style.background(BRIGHT | WHITE); /* workaround for invisible text */ break; }
+			case '1': { style = style.foreground(BLUE); if (CONFIG.styleContrastBackground) style = style.background(BRIGHT | WHITE); break; }
+			case '2': { style = style.foreground(GREEN); break; }
+			case '3': { style = style.foreground(CYAN); break; }
+			case '4': { style = style.foreground(RED); break; }
+			case '5': { style = style.foreground(MAGENTA); break; }
+			case '6': { style = style.foreground(YELLOW); break; }
+			case '7': { style = style.foreground(WHITE); /* gray */ break; }
+			case '8': { style = style.foreground(BRIGHT | BLACK); /* dark grey */ break; }
+			case '9': { style = style.foreground(BRIGHT | BLUE); break; }
+			case 'a': { style = style.foreground(BRIGHT | GREEN); break; }
+			case 'b': { style = style.foreground(BRIGHT | CYAN); break; }
+			case 'c': { style = style.foreground(BRIGHT | RED); break; }
+			case 'd': { style = style.foreground(BRIGHT | MAGENTA); break; }
+			case 'e': { style = style.foreground(BRIGHT | YELLOW); break; }
+			case 'f': { style = style.foreground(BRIGHT | WHITE); if (CONFIG.styleContrastBackground) style = style.background(BLACK);} // white break; }
 		}
 
 		return style;
