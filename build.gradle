@@ -1,17 +1,16 @@
 plugins {
-	id 'fabric-loom' version '1.0-SNAPSHOT'
+	id 'fabric-loom' version '1.3-SNAPSHOT'
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
-
-archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+base {
+	archivesName = project.archives_base_name
+}
+
 dependencies {
-	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -26,45 +25,41 @@ dependencies {
 }
 
 processResources {
-	inputs.property "version", project.version
+	def stringProperties = [
+		"version": project.version,
+		"java_version": project.java_version
+	]
+	stringProperties.each { inputs.property it.key, it.value }
 
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+	filesMatching(["fabric.mod.json", "jline4mcdsrv.mixins.json"]) {
+		expand(stringProperties ) {
+			escapeBackslash = true
+		}
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.compilerArgs.add('-Xlint:deprecation')
-	it.options.release = 16
+	it.options.release = project.java_version as Integer
 }
 
-// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-// if it is present.
-// If you remove this task, sources will not be generated.
 java {
+	targetCompatibility = sourceCompatibility = JavaVersion.toVersion(project.java_version as Integer)
 	withSourcesJar()
 }
 
 jar {
-	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+	from('LICENSE') {
+		rename { "${it}_${project.base.archivesName.get()}" }
 	}
 }
 
-// configure the maven publication
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
 			mavenJava(MavenPublication) {
 				from components.java
 			}
 		}
-	}
-
-	// select the repositories you want to publish to
-	repositories {
-		// uncomment to publish to the local maven
-		// mavenLocal()
 	}
 }
