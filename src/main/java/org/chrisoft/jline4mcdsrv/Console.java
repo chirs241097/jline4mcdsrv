@@ -45,7 +45,7 @@ public class Console
 		Logger rootLogger = ctx.getRootLogger();
 		LoggerConfig conf = rootLogger.get();
 
-		// compatibility hack for Not Enough Crashes
+		// compatibility hack for Not Enough Crashes (note: stack trace deobfuscation was removed in NEC >= 4.3.0)
 		RewritePolicy policy = getNECRewritePolicy(conf);
 		if (policy != null) {
 			jlineAppender.setRewritePolicy(policy);
