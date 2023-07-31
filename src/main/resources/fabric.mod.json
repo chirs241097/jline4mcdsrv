@@ -1,12 +1,13 @@
 {
   "schemaVersion": 1,
   "id": "jline4mcdsrv",
-  "version": "0.1.0",
+  "version": "${version}",
 
   "name": "JLine for Minecraft Dedicated Server",
   "description": "Enables command history, auto completion and syntax highlighting on the server console.",
   "authors": [
-    "Chris Xiong"
+    "Chris Xiong",
+    "Fourmisain"
   ],
   "contact": {
     "homepage": "https://chrisoft.org/",
@@ -27,8 +28,8 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.7.4",
-    "minecraft": "1.16.x"
+    "fabricloader": ">=0.12.12",
+    "minecraft": "~1.16"
   },
   "suggests": {
     "flamingo": "*"
