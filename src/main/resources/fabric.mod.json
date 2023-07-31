@@ -6,7 +6,8 @@
   "name": "JLine for Minecraft Dedicated Server",
   "description": "Enables command history, auto completion and syntax highlighting on the server console.",
   "authors": [
-    "Chris Xiong"
+    "Chris Xiong",
+    "Fourmisain"
   ],
   "contact": {
     "homepage": "https://chrisoft.org/",
