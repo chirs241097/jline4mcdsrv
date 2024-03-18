@@ -17,7 +17,6 @@ dependencies {
 
 	modImplementation include("org.jline:jline:${project.jline_version}")
 	modImplementation include("org.jline:jline-terminal-jansi:${project.jline_version}")
-	modImplementation include("org.fusesource.jansi:jansi:${project.jansi_version}")
 
 	include modApi("com.moandjiezana.toml:toml4j:${project.toml4j_version}") {
 		exclude(module: "gson")
