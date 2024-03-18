@@ -2,14 +2,12 @@ package org.chrisoft.jline4mcdsrv;
 
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.rewrite.RewriteAppender;
 import org.apache.logging.log4j.core.appender.rewrite.RewritePolicy;
 import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.jetbrains.annotations.Nullable;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -18,13 +16,19 @@ import org.jline.utils.AttributedStyle;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 import static org.chrisoft.jline4mcdsrv.JLineForMcDSrvMain.CONFIG;
 import static org.chrisoft.jline4mcdsrv.JLineForMcDSrvMain.LOGGER;
 import static org.jline.utils.AttributedStyle.*;
 
 public class Console
 {
+	public static final Set<String> DEOBFUSCATING_APPENDERS = Stream.of("NotEnoughCrashesDeobfuscatingAppender", "StackDeobfAppender")
+		.collect(collectingAndThen(toCollection(HashSet::new), Collections::unmodifiableSet));
+
 	public static MinecraftDedicatedServer server;
 
 	public static void run()
@@ -45,11 +49,11 @@ public class Console
 		Logger rootLogger = ctx.getRootLogger();
 		LoggerConfig conf = rootLogger.get();
 
-		// compatibility hack for Not Enough Crashes (note: stack trace deobfuscation was removed in NEC >= 4.3.0)
-		RewritePolicy policy = getNECRewritePolicy(conf);
-		if (policy != null) {
-			jlineAppender.setRewritePolicy(policy);
-			removeSysOutFromNECRewriteAppender(ctx, conf, policy);
+		// compatibility hack for Not Enough Crashes / StackDeobfuscator (note: stack trace deobfuscation was removed in NEC >= 4.3.0)
+		Optional<RewritePolicy> policy = getDeobfuscatingRewritePolicy(conf);
+		if (policy.isPresent()) {
+			jlineAppender.setRewritePolicy(policy.get());
+			removeSysOutFromObfuscatingAppenders(ctx, conf, policy.get());
 		}
 
 		// replace SysOut appender with Console appender
@@ -80,27 +84,26 @@ public class Console
 		}
 	}
 
-	/** Read the RewritePolicy Not Enough Crashes uses to deobfuscate stack traces */
-	@Nullable
-	private static RewritePolicy getNECRewritePolicy(LoggerConfig conf) {
-		for (Appender appender : conf.getAppenders().values()) {
-			if (appender.getName().equals("NotEnoughCrashesDeobfuscatingAppender")) {
+	/** Read the RewritePolicy Not Enough Crashes or StackDeobfuscator uses to deobfuscate stack traces */
+	private static Optional<RewritePolicy> getDeobfuscatingRewritePolicy(LoggerConfig conf) {
+		return conf.getAppenders().values().stream()
+			.filter(appender -> DEOBFUSCATING_APPENDERS.contains(appender.getName()))
+			.map(appender -> {
 				try {
-					// Could be replaced by a Mixin Accessor but this would add NEC as a compile dependency
-					// This should be fine since speed isn't an issue and it hasn't failed yet
+					// Could be replaced by a Mixin Accessor but speed isn't an issue, and this hasn't failed yet
 					Field field = appender.getClass().getDeclaredField("rewritePolicy");
 					field.setAccessible(true);
 					return (RewritePolicy) field.get(appender);
 				} catch (Exception e) {
-					LOGGER.error("Couldn't read Not Enough Crashes' rewritePolicy", e);
+					LOGGER.error("Couldn't read deobfuscating RewritePolicy", e);
+					return null;
 				}
-			}
-		}
-
-		return null;
+			})
+			.filter(Objects::nonNull)
+			.findAny();
 	}
 
-	private static void removeSysOutFromNECRewriteAppender(LoggerContext ctx, LoggerConfig conf, RewritePolicy policy) {
+	private static void removeSysOutFromObfuscatingAppenders(LoggerContext ctx, LoggerConfig conf, RewritePolicy policy) {
 		/*
 		 * This method is pretty hacky: we remove, recreate and readd NEC's appender
 		 * For (MIT-licensed) reference see:
@@ -113,7 +116,7 @@ public class Console
 
 		// wrap them in a RewriteAppender
 		RewriteAppender rewriteAppender = RewriteAppender.createAppender(
-				"NotEnoughCrashesDeobfuscatingAppender",
+				"WrappedDeobfuscatingAppender",
 				"true",
 				appenderRefs.toArray(new AppenderRef[0]),
 				ctx.getConfiguration(),
@@ -122,7 +125,10 @@ public class Console
 		);
 		rewriteAppender.start();
 
-		conf.removeAppender("NotEnoughCrashesDeobfuscatingAppender");
+		for (String name : DEOBFUSCATING_APPENDERS) {
+			conf.removeAppender(name);
+		}
+
 		conf.addAppender(rewriteAppender, null, null);
 	}
 
