@@ -14,8 +14,9 @@ public class JLineAppender extends AbstractAppender {
 	protected final LineReader lr;
 	protected RewritePolicy policy;
 
+	@SuppressWarnings("deprecation") // allows running on 1.16 and 1.17+
 	public JLineAppender(LineReader lr) {
-		super("JLine", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.CONFIG.logPattern).build(), false, Property.EMPTY_ARRAY);
+		super("JLine", null, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.CONFIG.logPattern).build(), false);
 		this.lr = lr;
 	}
 
