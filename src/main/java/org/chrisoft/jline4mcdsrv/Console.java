@@ -14,6 +14,8 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
 import org.jline.utils.AttributedStyle;
 
+import java.io.IOError;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Stream;
@@ -30,37 +32,35 @@ public class Console
 		.collect(collectingAndThen(toCollection(HashSet::new), Collections::unmodifiableSet));
 
 	public static MinecraftDedicatedServer server;
+	private static IOError lastError = null;
 
-	public static void run()
-	{
+	public static void run() {
 		MinecraftDedicatedServer srv = Objects.requireNonNull(server); // captureServer() happens-before
 
-		LineReader lr = LineReaderBuilder.builder()
-				.completer(new MinecraftCommandCompleter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
-				.highlighter(new MinecraftCommandHighlighter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
-				.variable(LineReader.SECONDARY_PROMPT_PATTERN, "/")
-				.option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
-				.build();
+		do {
+			LineReader lr = buildLineReader(srv); // note: can throw IOError as well (little we can do)
 
-		JLineAppender jlineAppender = new JLineAppender(lr);
-		jlineAppender.start();
+			updateLogConfig(lr);
 
-		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-		Logger rootLogger = ctx.getRootLogger();
-		LoggerConfig conf = rootLogger.get();
+			if (lastError != null) {
+				LOGGER.error("restarted terminal due to IO error:", lastError);
+				lastError = null;
+			}
 
-		// compatibility hack for Not Enough Crashes / StackDeobfuscator (note: stack trace deobfuscation was removed in NEC >= 4.3.0)
-		Optional<RewritePolicy> policy = getDeobfuscatingRewritePolicy(conf);
-		if (policy.isPresent()) {
-			jlineAppender.setRewritePolicy(policy.get());
-			removeSysOutFromObfuscatingAppenders(ctx, conf, policy.get());
-		}
+			try {
+				processCommands(srv, lr);
+			} catch (IOError e) {
+				// try to recover by closing and restarting the terminal
+				try {
+					lr.getTerminal().close();
+				} catch (IOException ignored) { }
 
-		// replace SysOut appender with Console appender
-		conf.removeAppender("SysOut");
-		conf.addAppender(jlineAppender, null, null);
-		ctx.updateLoggers();
+				lastError = e;
+			}
+		} while (lastError != null);
+	}
 
+	private static void processCommands(MinecraftDedicatedServer srv, LineReader lr) {
 		while (!srv.isStopped() && srv.isRunning()) {
 			try {
 				// readLine can read multi-line inputs which we manually split up
@@ -77,18 +77,52 @@ public class Console
 					if (cmd.equals("stop"))
 						return;
 				}
-			} catch (EndOfFileException|UserInterruptException e) {
+			} catch (EndOfFileException | UserInterruptException e) {
 				srv.enqueueCommand("stop", srv.getCommandSource());
-				return;
 			}
 		}
+	}
+
+	private static LineReader buildLineReader(MinecraftDedicatedServer srv) throws IOError {
+		return LineReaderBuilder.builder()
+			.completer(new MinecraftCommandCompleter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
+			.highlighter(new MinecraftCommandHighlighter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
+			.variable(LineReader.SECONDARY_PROMPT_PATTERN, "/")
+			.option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
+			.build();
+	}
+
+	private static void updateLogConfig(LineReader lr) {
+		JLineAppender jlineAppender = new JLineAppender(lr);
+		jlineAppender.start();
+
+		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+		Logger rootLogger = ctx.getRootLogger();
+		LoggerConfig conf = rootLogger.get();
+
+		// compatibility hack for Not Enough Crashes / StackDeobfuscator (note: stack trace deobfuscation was removed in NEC >= 4.3.0)
+		Optional<RewritePolicy> policy = getDeobfuscatingRewritePolicy(conf);
+		if (policy.isPresent()) {
+			jlineAppender.setRewritePolicy(policy.get());
+			removeSysOutFromObfuscatingAppenders(ctx, conf, policy.get());
+		}
+
+		// replace SysOut appender with Console appender
+		conf.removeAppender("SysOut");
+		conf.removeAppender("JLine");
+		conf.addAppender(jlineAppender, null, null);
+		ctx.updateLoggers();
 	}
 
 	/** Read the RewritePolicy Not Enough Crashes or StackDeobfuscator uses to deobfuscate stack traces */
 	private static Optional<RewritePolicy> getDeobfuscatingRewritePolicy(LoggerConfig conf) {
 		return conf.getAppenders().values().stream()
-			.filter(appender -> DEOBFUSCATING_APPENDERS.contains(appender.getName()))
+			.filter(appender -> DEOBFUSCATING_APPENDERS.contains(appender.getName()) || appender instanceof JLineAppender)
 			.map(appender -> {
+				if (appender instanceof JLineAppender) {
+					return ((JLineAppender) appender).getRewritePolicy();
+				}
+
 				try {
 					// Could be replaced by a Mixin Accessor but speed isn't an issue, and this hasn't failed yet
 					Field field = appender.getClass().getDeclaredField("rewritePolicy");
@@ -112,7 +146,7 @@ public class Console
 
 		// get all AppenderRefs except SysOut
 		List<AppenderRef> appenderRefs = new ArrayList<>(conf.getAppenderRefs());
-		appenderRefs.removeIf((ref) -> ref.getRef().equals("SysOut"));
+		appenderRefs.removeIf(ref -> ref.getRef().equals("SysOut"));
 
 		// wrap them in a RewriteAppender
 		RewriteAppender rewriteAppender = RewriteAppender.createAppender(
@@ -129,6 +163,7 @@ public class Console
 			conf.removeAppender(name);
 		}
 
+		conf.removeAppender("WrappedDeobfuscatingAppender");
 		conf.addAppender(rewriteAppender, null, null);
 	}
 
