@@ -24,7 +24,7 @@ public class JLineForMcDSrvConfig
 	public String logPattern = "%style{[%d{HH:mm:ss}]}{blue} "
 			+ "%highlight{[%t/%level]}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=green, TRACE=blue} "
 			+ "%style{(%logger{1})}{cyan} "
-			+ "%highlight{%msg%n}{FATAL=red, ERROR=red, WARN=normal, INFO=normal, DEBUG=normal, TRACE=normal}";
+			+ "%highlight{%msg{nolookups}%n}{FATAL=red, ERROR=red, WARN=normal, INFO=normal, DEBUG=normal, TRACE=normal}";
 
 	public StyleColor[] highlightColors = {StyleColor.CYAN, StyleColor.YELLOW, StyleColor.GREEN, StyleColor.MAGENTA, StyleColor.WHITE};
 
