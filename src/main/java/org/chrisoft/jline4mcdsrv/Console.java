@@ -2,12 +2,14 @@ package org.chrisoft.jline4mcdsrv;
 
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.rewrite.RewriteAppender;
 import org.apache.logging.log4j.core.appender.rewrite.RewritePolicy;
 import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.filter.AbstractFilterable;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -93,21 +95,26 @@ public class Console
 	}
 
 	private static void updateLogConfig(LineReader lr) {
-		JLineAppender jlineAppender = new JLineAppender(lr);
-		jlineAppender.start();
-
 		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-		Logger rootLogger = ctx.getRootLogger();
-		LoggerConfig conf = rootLogger.get();
+		LoggerConfig conf = ctx.getRootLogger().get();
 
-		// compatibility hack for Not Enough Crashes / StackDeobfuscator (note: stack trace deobfuscation was removed in NEC >= 4.3.0)
-		Optional<RewritePolicy> policy = getDeobfuscatingRewritePolicy(conf);
-		if (policy.isPresent()) {
-			jlineAppender.setRewritePolicy(policy.get());
-			removeSysOutFromObfuscatingAppenders(ctx, conf, policy.get());
+		// copy SysOut filter
+		Filter filter = null;
+		Appender sysOut = ctx.getConfiguration().getAppender("SysOut");
+		if (sysOut instanceof AbstractFilterable) {
+			filter = ((AbstractFilterable) sysOut).getFilter();
 		}
 
-		// replace SysOut appender with Console appender
+		// compatibility hack for Not Enough Crashes / StackDeobfuscator (note: stack trace deobfuscation was removed in NEC >= 4.3.0)
+		RewritePolicy policy = getDeobfuscatingRewritePolicy(conf).orElse(null);
+		if (policy != null) {
+			removeSysOutFromObfuscatingAppenders(ctx, conf, policy);
+		}
+
+		JLineAppender jlineAppender = new JLineAppender(lr, filter, policy);
+		jlineAppender.start();
+
+		// replace SysOut appender with JLine appender
 		conf.removeAppender("SysOut");
 		conf.removeAppender("JLine");
 		conf.addAppender(jlineAppender, null, null);
