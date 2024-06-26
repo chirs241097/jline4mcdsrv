@@ -16,7 +16,7 @@ public class JLineAppender extends AbstractAppender {
 
 	@SuppressWarnings("deprecation") // allows running on 1.16 and 1.17+
 	public JLineAppender(LineReader lr, Filter filter, RewritePolicy rewritePolicy) {
-		super("JLine", filter, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.CONFIG.logPattern).build(), false);
+		super("JLine", filter, PatternLayout.newBuilder().withPattern(JLineForMcDSrvMain.CONFIG.logPattern).withDisableAnsi(false).build(), false);
 		this.lr = lr;
 		this.rewritePolicy = rewritePolicy;
 	}
