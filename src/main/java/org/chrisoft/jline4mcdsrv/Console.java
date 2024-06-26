@@ -1,6 +1,7 @@
 package org.chrisoft.jline4mcdsrv;
 
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter;
@@ -8,6 +9,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.rewrite.RewriteAppender;
 import org.apache.logging.log4j.core.appender.rewrite.RewritePolicy;
 import org.apache.logging.log4j.core.config.AppenderRef;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.filter.AbstractFilterable;
 import org.jline.reader.EndOfFileException;
@@ -98,11 +100,22 @@ public class Console
 		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
 		LoggerConfig conf = ctx.getRootLogger().get();
 
-		// copy SysOut filter
+		// copy SysOut Appender and AppenderRef level and filters
+		Configuration configuration = ctx.getConfiguration();
+		Appender sysOut = configuration.getAppender("SysOut");
+		AppenderRef sysOutRef = configuration.getRootLogger().getAppenderRefs()
+			.stream().filter(ref -> ref.getRef().equals("SysOut")).findAny().orElse(null);
+
 		Filter filter = null;
-		Appender sysOut = ctx.getConfiguration().getAppender("SysOut");
 		if (sysOut instanceof AbstractFilterable) {
 			filter = ((AbstractFilterable) sysOut).getFilter();
+		}
+
+		Level refLevel = null;
+		Filter refFilter = null;
+		if (sysOutRef != null) {
+			refLevel = sysOutRef.getLevel();
+			refFilter = sysOutRef.getFilter();
 		}
 
 		// compatibility hack for Not Enough Crashes / StackDeobfuscator (note: stack trace deobfuscation was removed in NEC >= 4.3.0)
@@ -117,7 +130,7 @@ public class Console
 		// replace SysOut appender with JLine appender
 		conf.removeAppender("SysOut");
 		conf.removeAppender("JLine");
-		conf.addAppender(jlineAppender, null, null);
+		conf.addAppender(jlineAppender, refLevel, refFilter);
 		ctx.updateLoggers();
 	}
 
