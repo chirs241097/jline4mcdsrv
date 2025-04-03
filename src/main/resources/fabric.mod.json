@@ -29,9 +29,6 @@
 
   "depends": {
     "fabricloader": ">=0.12.12",
-    "minecraft": ">=1.16"
-  },
-  "suggests": {
-    "flamingo": "*"
+    "minecraft": ">=1.16 <=1.21.5"
   }
 }
