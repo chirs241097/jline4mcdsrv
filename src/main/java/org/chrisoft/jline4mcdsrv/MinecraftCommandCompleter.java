@@ -5,6 +5,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
@@ -15,18 +16,22 @@ import java.util.concurrent.CompletableFuture;
 
 public class MinecraftCommandCompleter implements Completer
 {
-	private final CommandDispatcher<ServerCommandSource> cmdDispatcher;
-	private final ServerCommandSource cmdSrc;
+	private final MinecraftDedicatedServer server;
 
-	public MinecraftCommandCompleter(CommandDispatcher<ServerCommandSource> cmdDispatcher, ServerCommandSource cmdSrc)
-	{
-		this.cmdDispatcher = cmdDispatcher;
-		this.cmdSrc = cmdSrc;
+	public MinecraftCommandCompleter(MinecraftDedicatedServer server) {
+		this.server = server;
 	}
 
 	@Override
 	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates)
 	{
+		CommandDispatcher<ServerCommandSource> cmdDispatcher = Console.getCommandDispatcher(server);
+		ServerCommandSource cmdSrc = Console.getCommandSource(server);
+
+		// not yet time
+		if (cmdDispatcher == null || cmdSrc == null)
+			return;
+
 		//trim previous and next lines
 		String input = line.line();
 		int left = input.lastIndexOf('\n', line.cursor() - 1); left = left == -1 ? 0 : left + 1;

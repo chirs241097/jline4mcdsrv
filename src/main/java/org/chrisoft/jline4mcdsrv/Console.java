@@ -1,5 +1,9 @@
 package org.chrisoft.jline4mcdsrv;
 
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.server.GameInstance;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -12,6 +16,7 @@ import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.filter.AbstractFilterable;
+import org.jetbrains.annotations.Nullable;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -76,21 +81,34 @@ public class Console
 					if (cmd.isEmpty())
 						continue;
 
-					srv.enqueueCommand(cmd, srv.getCommandSource());
+					GameInstance game = srv.getGameInstance();
+					if (game != null) {
+						srv.enqueueCommand(cmd, game.getCommandSource());
+					} else {
+						// vanilla error message
+						LOGGER.error("Whoops, can't really run your command right now, terribly sorry");
+					}
 
 					if (cmd.equals("stop"))
 						return;
 				}
 			} catch (EndOfFileException | UserInterruptException e) {
-				srv.enqueueCommand("stop", srv.getCommandSource());
+				GameInstance gameInstance = srv.getGameInstance();
+				if (gameInstance != null) {
+					srv.enqueueCommand("stop", gameInstance.getCommandSource());
+				} else {
+					// simulate stop command (ensure we can always stop the server)
+					LOGGER.info("Stopping the server");
+					srv.stop(false);
+				}
 			}
 		}
 	}
 
 	private static LineReader buildLineReader(MinecraftDedicatedServer srv) throws IOError {
 		return LineReaderBuilder.builder()
-			.completer(new MinecraftCommandCompleter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
-			.highlighter(new MinecraftCommandHighlighter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
+			.completer(new MinecraftCommandCompleter(srv))
+			.highlighter(new MinecraftCommandHighlighter(srv))
 			.variable(LineReader.SECONDARY_PROMPT_PATTERN, "/")
 			.option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
 			.build();
@@ -251,5 +269,17 @@ public class Console
 				.replace("\033[0;97m", "\033[0;97m\033[0;40m"); // white on black (light theme)
 
 		return s;
+	}
+
+	@Nullable
+	public static CommandDispatcher<ServerCommandSource> getCommandDispatcher(MinecraftServer server) {
+		GameInstance game = server.getGameInstance();
+		return game != null ? game.getCommandManager().getDispatcher() : null;
+	}
+
+	@Nullable
+	public static ServerCommandSource getCommandSource(MinecraftServer server) {
+		GameInstance game = server.getGameInstance();
+		return game != null ? game.getCommandSource() : null;
 	}
 }

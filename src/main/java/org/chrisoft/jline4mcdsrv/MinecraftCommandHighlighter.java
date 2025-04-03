@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.chrisoft.jline4mcdsrv.JLineForMcDSrvConfig.StyleColor;
 import org.jline.reader.Highlighter;
 import org.jline.reader.LineReader;
@@ -17,13 +18,10 @@ import static org.chrisoft.jline4mcdsrv.Console.applyMinecraftStyle;
 
 public class MinecraftCommandHighlighter implements Highlighter
 {
-	private final CommandDispatcher<ServerCommandSource> cmdDispatcher;
-	private final ServerCommandSource cmdSrc;
+	private final MinecraftDedicatedServer server;
 
-	public MinecraftCommandHighlighter(CommandDispatcher<ServerCommandSource> cmdDispatcher, ServerCommandSource cmdSrc)
-	{
-		this.cmdDispatcher = cmdDispatcher;
-		this.cmdSrc = cmdSrc;
+	public MinecraftCommandHighlighter(MinecraftDedicatedServer server) {
+		this.server = server;
 	}
 
 	private static void appendReformattedArgument(AttributedStringBuilder sb, String argument, AttributedStyle defaultStyle) {
@@ -49,6 +47,13 @@ public class MinecraftCommandHighlighter implements Highlighter
 	@Override
 	public AttributedString highlight(LineReader reader, String buffer)
 	{
+		CommandDispatcher<ServerCommandSource> cmdDispatcher = Console.getCommandDispatcher(server);
+		ServerCommandSource cmdSrc = Console.getCommandSource(server);
+
+		// not yet time
+		if (cmdDispatcher == null || cmdSrc == null)
+			return new AttributedStringBuilder().append(buffer, AttributedStyle.DEFAULT).toAttributedString();
+
 		StyleColor[] colors = JLineForMcDSrvMain.CONFIG.highlightColors;
 		String[] lines = buffer.split("\\n", -1);
 		AttributedStringBuilder sb = new AttributedStringBuilder();
