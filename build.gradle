@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.7-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -28,9 +28,9 @@ processResources {
 		"version": project.version,
 		"java_version": project.java_version
 	]
-	stringProperties.each { inputs.property it.key, it.value }
+	inputs.properties stringProperties
 
-	filesMatching(["fabric.mod.json", "jline4mcdsrv.mixins.json"]) {
+	filesMatching(["fabric.mod.json", "*.mixins.json"]) {
 		expand(stringProperties ) {
 			escapeBackslash = true
 		}
@@ -48,8 +48,10 @@ java {
 }
 
 jar {
-	from('LICENSE') {
-		rename { "${it}_${project.base.archivesName.get()}" }
+	inputs.property "archivesName", project.base.archivesName
+
+	from("LICENSE") {
+		rename { "${it}_${inputs.properties.archivesName}" }
 	}
 }
 
