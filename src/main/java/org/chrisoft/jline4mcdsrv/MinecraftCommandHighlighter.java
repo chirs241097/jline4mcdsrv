@@ -3,7 +3,6 @@ package org.chrisoft.jline4mcdsrv;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.context.ParsedCommandNode;
-import net.minecraft.server.command.ServerCommandSource;
 import org.chrisoft.jline4mcdsrv.JLineForMcDSrvConfig.StyleColor;
 import org.jline.reader.Highlighter;
 import org.jline.reader.LineReader;
@@ -12,15 +11,16 @@ import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 
 import java.util.regex.Pattern;
+import net.minecraft.commands.CommandSourceStack;
 
 import static org.chrisoft.jline4mcdsrv.Console.applyMinecraftStyle;
 
 public class MinecraftCommandHighlighter implements Highlighter
 {
-	private final CommandDispatcher<ServerCommandSource> cmdDispatcher;
-	private final ServerCommandSource cmdSrc;
+	private final CommandDispatcher<CommandSourceStack> cmdDispatcher;
+	private final CommandSourceStack cmdSrc;
 
-	public MinecraftCommandHighlighter(CommandDispatcher<ServerCommandSource> cmdDispatcher, ServerCommandSource cmdSrc)
+	public MinecraftCommandHighlighter(CommandDispatcher<CommandSourceStack> cmdDispatcher, CommandSourceStack cmdSrc)
 	{
 		this.cmdDispatcher = cmdDispatcher;
 		this.cmdSrc = cmdSrc;
@@ -61,11 +61,11 @@ public class MinecraftCommandHighlighter implements Highlighter
 				line = line.substring(1);
 			}
 
-			ParseResults<ServerCommandSource> parsed = cmdDispatcher.parse(line, cmdSrc);
+			ParseResults<CommandSourceStack> parsed = cmdDispatcher.parse(line, cmdSrc);
 
 			int pos = 0;
 			int component = -1;
-			for (ParsedCommandNode<ServerCommandSource> pcn : parsed.getContext().getNodes()) {
+			for (ParsedCommandNode<CommandSourceStack> pcn : parsed.getContext().getNodes()) {
 				if (++component >= colors.length)
 					component = 0;
 

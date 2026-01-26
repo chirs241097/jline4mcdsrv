@@ -5,7 +5,7 @@ import org.chrisoft.jline4mcdsrv.JLineForMcDSrvMain;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(targets = {"net.minecraft.server.dedicated.MinecraftDedicatedServer$1"})
+@Mixin(targets = {"net.minecraft.server.dedicated.DedicatedServer$1"})
 public abstract class DServerConsoleThreadInject
 {
 	/**

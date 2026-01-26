@@ -1,6 +1,5 @@
 package org.chrisoft.jline4mcdsrv;
 
-import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
@@ -23,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Stream;
+import net.minecraft.server.dedicated.DedicatedServer;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
@@ -35,11 +35,11 @@ public class Console
 	public static final Set<String> DEOBFUSCATING_APPENDERS = Stream.of("NotEnoughCrashesDeobfuscatingAppender", "StackDeobfAppender")
 		.collect(collectingAndThen(toCollection(HashSet::new), Collections::unmodifiableSet));
 
-	public static MinecraftDedicatedServer server;
+	public static DedicatedServer server;
 	private static IOError lastError = null;
 
 	public static void run() {
-		MinecraftDedicatedServer srv = Objects.requireNonNull(server); // captureServer() happens-before
+		DedicatedServer srv = Objects.requireNonNull(server); // captureServer() happens-before
 
 		do {
 			LineReader lr = buildLineReader(srv); // note: can throw IOError as well (little we can do)
@@ -64,7 +64,7 @@ public class Console
 		} while (lastError != null);
 	}
 
-	private static void processCommands(MinecraftDedicatedServer srv, LineReader lr) {
+	private static void processCommands(DedicatedServer srv, LineReader lr) {
 		while (!srv.isStopped() && srv.isRunning()) {
 			try {
 				// readLine can read multi-line inputs which we manually split up
@@ -76,21 +76,21 @@ public class Console
 					if (cmd.isEmpty())
 						continue;
 
-					srv.enqueueCommand(cmd, srv.getCommandSource());
+					srv.handleConsoleInput(cmd, srv.createCommandSourceStack());
 
 					if (cmd.equals("stop"))
 						return;
 				}
 			} catch (EndOfFileException | UserInterruptException e) {
-				srv.enqueueCommand("stop", srv.getCommandSource());
+				srv.handleConsoleInput("stop", srv.createCommandSourceStack());
 			}
 		}
 	}
 
-	private static LineReader buildLineReader(MinecraftDedicatedServer srv) throws IOError {
+	private static LineReader buildLineReader(DedicatedServer srv) throws IOError {
 		return LineReaderBuilder.builder()
-			.completer(new MinecraftCommandCompleter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
-			.highlighter(new MinecraftCommandHighlighter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
+			.completer(new MinecraftCommandCompleter(srv.getCommands().getDispatcher(), srv.createCommandSourceStack()))
+			.highlighter(new MinecraftCommandHighlighter(srv.getCommands().getDispatcher(), srv.createCommandSourceStack()))
 			.variable(LineReader.SECONDARY_PROMPT_PATTERN, "/")
 			.option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
 			.build();
